@@ -152,4 +152,54 @@ class PeliculaControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[2].actor.nombreCompleto").value("Leticia Brédice"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[2].roles[0]").value("Valeria"))
     }
+
+    @Test
+    fun `crear una pelicula funciona correctamente`() {
+        // creamos la película
+        val plataDulce = Pelicula().apply {
+            titulo = "Plata Dulce"
+            frase = ""
+            agregarPersonaje("Carlos Bonifatti", Actor().apply {
+                nombreCompleto = "Federico Luppi"
+                anioNacimiento = 1936
+            })
+            agregarPersonaje("Rubén Molinuevo", Actor().apply {
+                nombreCompleto = "Julio de Grazia"
+                anioNacimiento = 1929
+            })
+        }
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.post("/pelicula")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(plataDulce))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("Plata Dulce"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(2))
+
+        // borramos la película creada
+        val plataDulceCreada = mapper.readValue(result.andReturn().response.getContentAsString(), Pelicula::class.java)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/pelicula/${plataDulceCreada.id}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(plataDulce))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+
+        // por último hacemos la búsqueda y no encontramos nada
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/peliculas/plata")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(0))
+
+    }
+
+    // TODO: Buscar película que no existe
+    // TODO 2: Eliminar una película que no existe
+    // TODO 3: Actualizar una película que no existe
 }

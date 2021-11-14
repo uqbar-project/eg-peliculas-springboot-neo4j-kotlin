@@ -35,7 +35,7 @@ class PeliculaController {
 
     @DeleteMapping("/pelicula/{id}")
     @ApiOperation("Permite eliminar una película del sistema, esto incluirá a sus personajes (pero no a sus actores que tienen un ciclo de vida diferente).")
-    fun deletePelicula(@RequestBody pelicula: Pelicula) =
-        peliculaService.eliminar(pelicula)
+    fun deletePelicula(@PathVariable id: Long) =
+        peliculaService.eliminar(id)
 
 }

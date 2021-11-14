@@ -4,6 +4,7 @@ import ar.edu.algo3.peliculas.domain.Pelicula
 import org.springframework.data.neo4j.repository.Neo4jRepository
 import org.springframework.data.neo4j.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 interface PeliculasRepository : Neo4jRepository<Pelicula, Long>  {
@@ -12,6 +13,6 @@ interface PeliculasRepository : Neo4jRepository<Pelicula, Long>  {
     fun peliculasPorTitulo(titulo: String): List<Pelicula>
 
     @Query("MATCH (pelicula:Movie)<-[actuo_en:ACTED_IN]-(persona:Person) WHERE ID(pelicula) = \$id RETURN pelicula, collect(actuo_en), collect(persona) LIMIT 1")
-    fun pelicula(id: Long): Pelicula
+    fun pelicula(id: Long): Optional<Pelicula>
 
 }
