@@ -4,25 +4,36 @@ import ar.edu.algo3.peliculas.domain.Actor
 import ar.edu.algo3.peliculas.domain.Pelicula
 import ar.edu.algo3.peliculas.domain.Personaje
 import ar.edu.algo3.peliculas.repository.PeliculasRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.*
 import org.neo4j.driver.springframework.boot.test.autoconfigure.Neo4jTestHarnessAutoConfiguration
 import org.neo4j.harness.Neo4j
 import org.neo4j.harness.Neo4jBuilders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @EnableAutoConfiguration(exclude = [Neo4jTestHarnessAutoConfiguration::class])
-class PeliculaRepositoryTest {
+class PeliculaControllerTest {
     @Autowired
     lateinit var peliculasRepository: PeliculasRepository
 
+    @Autowired
+    lateinit var mockMvc: MockMvc
+
     companion object {
+        var mapper = ObjectMapper()
         lateinit var embeddedDatabaseServer: Neo4j
 
         @BeforeAll
@@ -88,21 +99,57 @@ class PeliculaRepositoryTest {
 
     }
 
-    @Test
-    @DisplayName("la búsqueda por título funciona correctamente")
-    fun testPeliculasPorTitulo() {
-        val peliculas = peliculasRepository.peliculasPorTitulo("""(?i).*nueve.*""")
-        Assertions.assertEquals(1, peliculas.size)
-        Assertions.assertEquals(0, peliculas.first().personajes.size)
+    @AfterEach
+    fun `delete fixture`() {
+        peliculasRepository.deleteAll()
     }
 
     @Test
-    @DisplayName("la búsqueda de una película trae los datos de la película y sus personajes")
-    fun testPeliculaConcreta() {
-        val pelicula = peliculasRepository.pelicula(nueveReinas.id!!)
-        Assertions.assertEquals("Nueve reinas", pelicula.titulo)
-        Assertions.assertEquals(2, pelicula.personajes.size)
-        val darin = pelicula.personajes.findLast { it.representadoPor("Ricardo Darín") }
-        Assertions.assertEquals("Marcos", darin!!.roles.first())
+    fun `la busqueda por título funciona correctamente, no importan mayusculas`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/peliculas/nueve")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].titulo").value("Nueve reinas"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].personajes.length()").value(0))
+    }
+
+    @Test
+    fun `la busqueda de una pelicula trae los datos de la pelicula y sus personajes`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/pelicula/${nueveReinas.id!!}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("Nueve reinas"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].actor.nombreCompleto").value("Ricardo Darín"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].roles[0]").value("Marcos"))
+    }
+
+    @Test
+    fun `actualizar una pelicula funciona correctamente`() {
+        nueveReinas.apply {
+            titulo = "9 Reinas"
+            agregarPersonaje("Valeria", Actor().apply {
+                nombreCompleto = "Leticia Brédice"
+                anioNacimiento = 1975
+            })
+        }
+        mockMvc.perform(
+            MockMvcRequestBuilders.put("/pelicula/${nueveReinas.id!!}")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(nueveReinas))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("9 Reinas"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(3))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[2].actor.nombreCompleto").value("Leticia Brédice"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[2].roles[0]").value("Valeria"))
     }
 }

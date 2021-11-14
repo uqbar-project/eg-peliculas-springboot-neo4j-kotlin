@@ -17,8 +17,9 @@ class PeliculaService {
     fun buscarPorId(id: Long) =
         peliculasRepository.pelicula(id)
 
-    fun guardar(pelicula: Pelicula) {
+    fun guardar(pelicula: Pelicula): Pelicula {
         peliculasRepository.save(pelicula)
+        return pelicula
     }
 
     fun eliminar(pelicula: Pelicula) {

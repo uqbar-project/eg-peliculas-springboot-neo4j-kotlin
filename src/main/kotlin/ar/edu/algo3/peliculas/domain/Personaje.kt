@@ -25,8 +25,4 @@ class Personaje {
             throw UserException("Debe ingresar qué actor cumple ese personaje")
         }
     }
-
-    fun representadoPor(nombre: String) =
-        actor!!.nombreCompleto == "Ricardo Darín"
-
 }
