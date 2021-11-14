@@ -24,8 +24,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-neo4j:2.5.6")
     implementation("io.springfox:springfox-boot-starter:3.0.0")
     implementation("io.springfox:springfox-swagger-ui:3.0.0")
-//    testImplementation("org.testcontainers:neo4j:1.16.2")
-//    testImplementation("org.testcontainers:junit-jupiter:1.16.2")
     testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.2.26")
     testImplementation("org.neo4j.test:neo4j-harness:4.3.7")
     testImplementation("org.neo4j.driver:neo4j-java-driver-test-harness-spring-boot-autoconfigure:4.2.7.0")
@@ -42,10 +40,44 @@ configurations {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
+        jvmTarget = "14"
     }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+tasks.jacocoTestReport {
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude("**/config/**", "**/entity/**", "**/*Application*.*", "**/ServletInitializer.*")
+            }
+        })
+    )
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+tasks.register("runOnGitHub") {
+    dependsOn("jacocoTestReport")
+    group = "custom"
+    description = "$ ./gradlew runOnGitHub # runs on GitHub Action"
+}
+
