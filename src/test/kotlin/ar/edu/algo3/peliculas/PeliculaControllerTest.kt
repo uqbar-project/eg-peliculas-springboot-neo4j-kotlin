@@ -3,6 +3,7 @@ package ar.edu.algo3.peliculas
 import ar.edu.algo3.peliculas.domain.Actor
 import ar.edu.algo3.peliculas.domain.Pelicula
 import ar.edu.algo3.peliculas.domain.Personaje
+import ar.edu.algo3.peliculas.repository.ActoresRepository
 import ar.edu.algo3.peliculas.repository.PeliculasRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.*
@@ -30,6 +31,9 @@ class PeliculaControllerTest {
     lateinit var peliculasRepository: PeliculasRepository
 
     @Autowired
+    lateinit var actoresRepository: ActoresRepository
+
+    @Autowired
     lateinit var mockMvc: MockMvc
 
     companion object {
@@ -41,12 +45,6 @@ class PeliculaControllerTest {
         fun initializeNeo4j() {
             embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
                 .withDisabledServer()
-                .withFixture(
-                    ""
-                            + "CREATE (TheMatrix:Movie {title:'The Matrix', released:1999, tagline:'Welcome to the Real World'})\n"
-                            + "CREATE (TheMatrixReloaded:Movie {title:'The Matrix Reloaded', released:2003, tagline:'Free your mind'})\n"
-                            + "CREATE (TheMatrixRevolutions:Movie {title:'The Matrix Revolutions', released:2003, tagline:'Everything that has a beginning has an end'})\n"
-                )
                 .build()
         }
 
@@ -101,6 +99,7 @@ class PeliculaControllerTest {
 
     @AfterEach
     fun `delete fixture`() {
+        actoresRepository.deleteAll()
         peliculasRepository.deleteAll()
     }
 
@@ -295,7 +294,7 @@ class PeliculaControllerTest {
     @Test
     fun `la busqueda de actores funciona correctamente`() {
         mockMvc.perform(
-            MockMvcRequestBuilders.get("/actores/darin")
+            MockMvcRequestBuilders.get("/actores/dar")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
