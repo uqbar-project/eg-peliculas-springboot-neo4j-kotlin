@@ -17,15 +17,6 @@ El ejemplo Movies que viene con Neo4j propone
 
 Instalar previamente Neo4j o bien levantar una imagen de Docker
 
-<!-- ```bash
-Instalar la última versión de Neo4j con Docker
-docker pull neo4j:4.2.3
-docker run \
-     --publish=7474:7474 --publish=7687:7687 \
-     --volume=$HOME/neo4j/data:/data \
-     neo4j:4.2.3
-``` -->
-
 ```bash
 docker run -p7474:7474 -p7687:7687 -e NEO4J_AUTH=neo4j/s3cr3t neo4j
 ```
@@ -33,7 +24,7 @@ docker run -p7474:7474 -p7687:7687 -e NEO4J_AUTH=neo4j/s3cr3t neo4j
 - Abrir el Navegador de Neo4J Desktop o bien ingresar manualmente a la URL: http://localhost:7474
 - Ejecutar el script que carga el grafo de películas (viene como ejemplo)
 
-![script inicial](./video/scriptInicial.gif)
+![script inicial](./images/scriptInicial.gif)
 
 ## Configuración
 
@@ -70,27 +61,24 @@ MATCH (pelicula:Movie) WHERE pelicula.title =~ '.*Good.*' RETURN pelicula LIMIT 
 
 La interfaz _Neo4jRepository_ de Spring boot nos permite declarativamente establecer las consultas a la base, y reemplazaremos el valor concreto '.*Good.*' por el parámetro que recibe el contrato:
 
-```xtend
-	@Query("MATCH (pelicula:Movie) WHERE pelicula.title =~ $titulo RETURN pelicula LIMIT 10")
-	def List<Pelicula> peliculasPorTitulo(String titulo)
+```kt
+@Query("MATCH (pelicula:Movie) WHERE pelicula.title =~ \$titulo RETURN pelicula LIMIT 10")
+fun peliculasPorTitulo(titulo: String): List<Pelicula>
 ```
 
 `$titulo` es la nueva forma de asociar el valor del parámetro `titulo` (hay que respetar los mismos nombres). Dado que queremos armar la expresión _contiene_, esto debemos hacerlo antes de llamar al repositorio, en este caso es el Service):
 
-```xtend
-def buscarPorTitulo(String titulo) {
-	peliculasRepository.peliculasPorTitulo(titulo.contiene)
-}
+```kt
+@Transactional(readOnly = true)
+fun buscarPorTitulo(titulo: String) =
+    peliculasRepository.peliculasPorTitulo(titulo.contiene())
 ```
 
-`contiene` es en realidad un _extension method_ definido en el archivo CipherUtils:
+- la anotación `@Transactional(readOnly = true)` le marca a Springboot que no necesita enmarcar al método dentro de una transacción (de esa manera utiliza menos recursos ya que no necesita registrar lo que va haciendo para poder deshacer los cambios)
+- `contiene` es en realidad un _extension method_ definido en el archivo CipherUtils:
 
-```xtend
-class CipherUtils {
-	static def contiene(String valor) {
-		'''(?i).*«valor».*'''.toString
-	}
-}
+```kt
+fun String.contiene() = """(?i).*$this.*"""
 ```
 
 En este caso solo queremos traer el nodo película, sin sus relaciones, por lo que el endpoint devuelve una lista de personajes vacía. Esto mejora la performance de la consulta aunque hay que exponer esta decisión a quien consuma nuestra API.
@@ -107,46 +95,50 @@ Es importante utilizar la instrucción [`collect`](https://neo4j.com/docs/cypher
 
 ### Actualizaciones a una película
 
-Es interesante ver que el controller delega la creación, actualización o eliminación al repositorio:
+Es interesante ver que el controller delega la creación, actualización o eliminación al service, que delimita la transaccionalidad. Por ejemplo, la creación de una película:
 
-```xtend
-	@PostMapping("/pelicula")
-	def createPelicula(@RequestBody Pelicula pelicula) {
-		peliculasRepository.save(pelicula)
-	}
-
-	@DeleteMapping("/pelicula/{id}")
-	def deletePelicula(@RequestBody Pelicula pelicula) {
-		peliculasRepository.delete(pelicula)
-	}
+```kt
+@PostMapping("/pelicula")
+@ApiOperation("Permite crear una nueva película con sus personajes.")
+fun createPelicula(@RequestBody pelicula: Pelicula) =
+    peliculaService.guardar(pelicula)
 ```
 
-pero que esos métodos ni siquiera es necesario que los defina nuestra interfaz, porque ya están siendo inyectados por la interfaz Neo4jRepository (la declaratividad en su máxima expresión). El motor, en este caso Spring boot, persiste el nodo película y [cualquier relación hasta el nivel de profundidad 5 que no entre en referencia circular](https://community.neo4j.com/t/repository-save-find-depth/15181). Anteriormente, existía un SessionManager donde podíamos tener un mayor control de la información que actualizábamos o recuperábamos: para algunos esto puede ser una desventaja, contra lo bueno que puede suponer delegar esa responsabilidad en un algoritmo optimizado.
+El service, a su vez, define que el método es transaccional y delega al repositorio:
+
+```kt
+@Transactional
+fun guardar(pelicula: Pelicula): Pelicula {
+    pelicula.validar()
+    peliculasRepository.save(pelicula)
+    return pelicula
+}
+```
+
+los métodos de CRUD (Create, Retrieve, Update, Delete) ni siquiera es necesario que los defina nuestra interfaz, porque ya están siendo inyectados por la interfaz Neo4jRepository (la declaratividad en su máxima expresión). El motor, en este caso Spring boot, persiste el nodo película y [cualquier relación hasta el nivel de profundidad 5 que no entre en referencia circular](https://community.neo4j.com/t/repository-save-find-depth/15181). Anteriormente, existía un SessionManager donde podíamos tener un mayor control de la información que actualizábamos o recuperábamos: para algunos esto puede ser una desventaja, contra lo bueno que puede suponer delegar esa responsabilidad en un algoritmo optimizado.
 
 ## Mapeos
 
 Mostraremos a continuación cómo es el mapeo de las películas (las anotaciones a partir de las últimas versiones de Neo4J 4.2.x cambiaron ligeramente)
 
-```xtend
+```kt
 @Node("Movie")
-@Accessors
 class Pelicula {
-	static int MINIMO_VALOR_ANIO = 1900
-	
-	@Id @GeneratedValue
-	Long id
 
-	@Property(name="title") // OJO, no es la property de xtend sino la de OGM
-	String titulo
-	
-	@Property("tagline")
-	String frase
-	
-	@Property("released")
-	Integer anio
-	
-	@Relationship(type = "ACTED_IN", direction = Direction.INCOMING)
-	List<Personaje> personajes = new ArrayList<Personaje>
+    @Id @GeneratedValue
+    var id: Long? = null
+
+    @Property(name="title") // OJO, no es la property de xtend sino la de OGM
+    lateinit var titulo: String
+
+    @Property("tagline")
+    var frase: String? = null
+
+    @Property("released")
+    var anio: Int = 0
+
+    @Relationship(type = "ACTED_IN", direction = Direction.INCOMING)
+    var personajes: MutableList<Personaje> = mutableListOf()
 ```
 
 Para profundizar más recomendamos ver los otros objetos de dominio en este ejemplo y [la página de mapeos de Neo4j - Spring boot](https://docs.spring.io/spring-data/neo4j/docs/current/reference/html/#mapping)
@@ -157,30 +149,120 @@ Por motivos didácticos hemos mantenido un ID Long que es el que genera Neo4J pa
 
 ## Tests de integración
 
-Elegimos hacer tests de integración sobre el repositorio, podríamos a futuro incluir al controller, pero dado que no tiene demasiada lógica por el momento estamos bien manteniendo tests más simples. Los casos de prueba que vamos a desarrollar son:
+Elegimos hacer tests de integración sobre el controller
 
-- la búsqueda de películas, donde validaremos que se puede encontrar por "título contiene" sin distinguir mayúsculas o minúsculas y que además no trae los personajes
-- la búsqueda puntual de una película que debe traer los personajes. La forma de buscar por id requiere que luego de enviar el mensaje `save` guardemos el nuevo estado de la película persistida, que tiene el identificador que el container de SDN (Spring Data Neo4J) le dio.
+- buscando películas por título
+- o buscando concretamente por id
+- actualizando una película existente
+- creando y luego eliminando una película
+- buscando una película inexistente
+- eliminando una película inexistente
+- actualizando una película inexistente
+- creando / actualizando películas con errores de validación (esperamos un bad request)
 
-```xtend
-	@Test
-	@DisplayName("la búsqueda por título funciona correctamente")
-	def void testPeliculasPorTitulo() {
-		val peliculas = peliculasRepository.peliculasPorTitulo('''(?i).*nueve.*''')
-		assertEquals(1, peliculas.size)
-		assertEquals(#[], peliculas.head.personajes)
-	}
+La parte interesante es que 
 
-	@Test
-	@DisplayName("la búsqueda de una película trae los datos de la película y sus personajes")
-	def void testPeliculaConcreta() {
-		val pelicula = peliculasRepository.pelicula(nueveReinas.id)
-		assertEquals("Nueve reinas", pelicula.titulo)
-		assertEquals(2, pelicula.personajes.size)
-		val darin = pelicula.personajes.findFirst [ actor.nombreCompleto.equalsIgnoreCase("Ricardo Darín")]
-		assertEquals("Marcos", darin.roles.head)
-	}
+- utilizamos una base de Neo4J embebida dentro de un companion object (lo que representa un elemento _static_ o de clase)
+- creamos un juego de datos de prueba antes de cada test
+- al finalizar cada test eliminamos los datos creados (esto permite iniciar cada test como si fuera desde cero)
 
+```kt
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@EnableAutoConfiguration(exclude = [Neo4jTestHarnessAutoConfiguration::class])
+class PeliculaControllerTest {
+    @Autowired
+    lateinit var peliculasRepository: PeliculasRepository
+
+    @Autowired
+    lateinit var actoresRepository: ActoresRepository
+
+    @Autowired
+    lateinit var mockMvc: MockMvc
+
+    companion object {
+        var mapper = ObjectMapper()
+        lateinit var embeddedDatabaseServer: Neo4j
+
+        @BeforeAll
+        @JvmStatic
+        fun initializeNeo4j() {
+            embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
+                .withDisabledServer()
+                .build()
+        }
+
+        @AfterAll
+        @JvmStatic
+        fun stopNeo4j() {
+            embeddedDatabaseServer.close()
+        }
+
+        @DynamicPropertySource
+        @JvmStatic
+        fun neo4jProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.neo4j.uri", embeddedDatabaseServer::boltURI)
+            registry.add("spring.neo4j.authentication.username") { "neo4j" }
+            registry.add("spring.neo4j.authentication.password") { null }
+        }
+    }
+
+    lateinit var nueveReinas: Pelicula
+
+    @BeforeEach
+    fun init() {
+        val darin = Actor().apply {
+            nombreCompleto = "Ricardo Darín"
+            anioNacimiento = 1957
+        }
+        nueveReinas = peliculasRepository.save(Pelicula().apply {
+            titulo = "Nueve reinas"
+            frase = "Dos estafadores, una mujer... y mucho dinero"
+            anio = 1998
+            personajes = mutableListOf(
+                Personaje().apply {
+                    roles = mutableListOf("Marcos")
+                    actor = darin
+                },
+                Personaje().apply {
+                    roles = mutableListOf("Juan")
+                    actor = Actor().apply {
+                        nombreCompleto = "Gastón Pauls"
+                        anioNacimiento = 1972
+                    }
+                }
+            )
+        })
+        peliculasRepository.save(Pelicula().apply {
+            titulo = "Tiempo de valientes"
+            frase = "Los tiempos cambian. Los héroes también."
+            anio = 2005
+        })
+
+    }
+
+    @AfterEach
+    fun `delete fixture`() {
+        actoresRepository.deleteAll()
+        peliculasRepository.deleteAll()
+    }
+
+    @Test
+    fun `la busqueda por titulo funciona correctamente, no importan mayusculas`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/peliculas/nueve")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].titulo").value("Nueve reinas"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].personajes.length()").value(0))
+    }
+    
+    ...
+}
 ```
 
 Para profundizar más en el tema recomendamos leer [esta página](https://medium.com/neo4j/testing-your-neo4j-based-java-application-34bef487cc3c)
@@ -192,3 +274,7 @@ Como de costumbre, pueden investigar los endpoints en el navegador mediante la s
 ```url
 http://localhost:8080/swagger-ui/index.html#
 ```
+
+## Cómo testear la aplicación en Insomnia
+
+Te dejamos [el archivo de Insomnia](./Peliculas_Insomnia.json) con ejemplos para probarlo.
