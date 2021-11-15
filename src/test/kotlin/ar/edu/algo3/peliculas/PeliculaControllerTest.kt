@@ -266,7 +266,7 @@ class PeliculaControllerTest {
     fun `crear una pelicula con un personaje sin rol da error de validacion`() {
         val peliculaConError = Pelicula().apply {
             titulo = "una peli"
-            anio = 1490
+            anio = 1990
             personajes = mutableListOf(Personaje().apply { actor = Actor().apply { nombreCompleto = "Ricardo Darín "}})
         }
         mockMvc.perform(
@@ -281,7 +281,7 @@ class PeliculaControllerTest {
     fun `crear una pelicula con un personaje sin actor da error de validacion`() {
         val peliculaConError = Pelicula().apply {
             titulo = "una peli"
-            anio = 1490
+            anio = 1990
             personajes = mutableListOf(Personaje().apply { roles = mutableListOf("Cacho")})
         }
         mockMvc.perform(
@@ -291,5 +291,18 @@ class PeliculaControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
+
+    @Test
+    fun `la busqueda de actores funciona correctamente`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/actores/darin")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].nombreCompleto").value("Ricardo Darín"))
+    }
+
 
 }
