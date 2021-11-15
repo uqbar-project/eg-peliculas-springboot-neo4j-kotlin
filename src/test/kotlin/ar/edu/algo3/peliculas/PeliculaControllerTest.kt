@@ -79,11 +79,11 @@ class PeliculaControllerTest {
             anio = 1998
             personajes = mutableListOf(
                 Personaje().apply {
-                    roles = listOf("Marcos")
+                    roles = mutableListOf("Marcos")
                     actor = darin
                 },
                 Personaje().apply {
-                    roles = listOf("Juan")
+                    roles = mutableListOf("Juan")
                     actor = Actor().apply {
                         nombreCompleto = "Gastón Pauls"
                         anioNacimiento = 1972
@@ -267,9 +267,9 @@ class PeliculaControllerTest {
         val peliculaConError = Pelicula().apply {
             titulo = "una peli"
             anio = 1490
-            agregarPersonaje("", Actor().apply { nombreCompleto = "Ricardo Darín "})
+            personajes = mutableListOf(Personaje().apply { actor = Actor().apply { nombreCompleto = "Ricardo Darín "}})
         }
-        val result = mockMvc.perform(
+        mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(peliculaConError))
@@ -282,9 +282,9 @@ class PeliculaControllerTest {
         val peliculaConError = Pelicula().apply {
             titulo = "una peli"
             anio = 1490
-            personajes = mutableListOf(Personaje().apply { roles = listOf("Cacho")})
+            personajes = mutableListOf(Personaje().apply { roles = mutableListOf("Cacho")})
         }
-        val result = mockMvc.perform(
+        mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(peliculaConError))

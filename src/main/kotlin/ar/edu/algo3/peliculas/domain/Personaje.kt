@@ -10,12 +10,10 @@ import org.springframework.data.neo4j.core.schema.TargetNode
 class Personaje {
     @Id @GeneratedValue
     var id: Long? = null
-    lateinit var roles: List<String>
+    var roles = mutableListOf<String>()
 
     @TargetNode
     var actor: Actor? = null
-
-    fun rolesMostrables() = roles.joinToString("")
 
     fun validar() {
         if (roles.isNullOrEmpty()) {
