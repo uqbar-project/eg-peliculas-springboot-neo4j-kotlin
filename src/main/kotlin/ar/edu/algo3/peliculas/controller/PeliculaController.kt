@@ -25,8 +25,10 @@ class PeliculaController {
 
     @PutMapping("/pelicula/{id}")
     @ApiOperation("Permite actualizar una película con sus personajes asociados.")
-    fun updatePelicula(@RequestBody pelicula: Pelicula) =
-        peliculaService.guardar(pelicula)
+    fun updatePelicula(@PathVariable id: Long, @RequestBody pelicula: Pelicula): Pelicula {
+        peliculaService.buscarPorId(id)
+        return peliculaService.guardar(pelicula)
+    }
 
     @PostMapping("/pelicula")
     @ApiOperation("Permite crear una nueva película con sus personajes.")

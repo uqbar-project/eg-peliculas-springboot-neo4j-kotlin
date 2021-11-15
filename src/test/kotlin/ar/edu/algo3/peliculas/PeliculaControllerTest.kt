@@ -105,7 +105,7 @@ class PeliculaControllerTest {
     }
 
     @Test
-    fun `la busqueda por título funciona correctamente, no importan mayusculas`() {
+    fun `la busqueda por titulo funciona correctamente, no importan mayusculas`() {
         mockMvc.perform(
             MockMvcRequestBuilders.get("/peliculas/nueve")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -158,6 +158,7 @@ class PeliculaControllerTest {
         // creamos la película
         val plataDulce = Pelicula().apply {
             titulo = "Plata Dulce"
+            anio = 1982
             frase = ""
             agregarPersonaje("Carlos Bonifatti", Actor().apply {
                 nombreCompleto = "Federico Luppi"
@@ -199,7 +200,96 @@ class PeliculaControllerTest {
 
     }
 
-    // TODO: Buscar película que no existe
-    // TODO 2: Eliminar una película que no existe
-    // TODO 3: Actualizar una película que no existe
+    @Test
+    fun `la busqueda de una pelicula que no existe da un codigo de error http 404`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/pelicula/10910111")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isNotFound)
+    }
+
+    @Test
+    fun `eliminar una pelicula que no existe da un codigo de error http 404`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.delete("/pelicula/10910111")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isNotFound)
+    }
+
+    @Test
+    fun `actualizar una pelicula que no existe da un codigo de error http 404`() {
+        nueveReinas.apply {
+            titulo = "9 Reinas"
+            agregarPersonaje("Valeria", Actor().apply {
+                nombreCompleto = "Leticia Brédice"
+                anioNacimiento = 1975
+            })
+        }
+        mockMvc.perform(
+            MockMvcRequestBuilders.put("/pelicula/91724681624")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(nueveReinas))
+        )
+            .andExpect(MockMvcResultMatchers.status().isNotFound)
+    }
+
+    @Test
+    fun `crear una pelicula sin titulo da error de validacion`() {
+        val peliculaConError = Pelicula().apply {
+            titulo = ""
+        }
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/pelicula")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(peliculaConError))
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
+
+    @Test
+    fun `crear una pelicula con un anio demasiado bajo da error de validacion`() {
+        val peliculaConError = Pelicula().apply {
+            titulo = "una peli"
+            anio = 1490
+        }
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.post("/pelicula")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(peliculaConError))
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
+
+    @Test
+    fun `crear una pelicula con un personaje sin rol da error de validacion`() {
+        val peliculaConError = Pelicula().apply {
+            titulo = "una peli"
+            anio = 1490
+            agregarPersonaje("", Actor().apply { nombreCompleto = "Ricardo Darín "})
+        }
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.post("/pelicula")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(peliculaConError))
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
+
+    @Test
+    fun `crear una pelicula con un personaje sin actor da error de validacion`() {
+        val peliculaConError = Pelicula().apply {
+            titulo = "una peli"
+            anio = 1490
+            personajes = mutableListOf(Personaje().apply { roles = listOf("Cacho")})
+        }
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.post("/pelicula")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(peliculaConError))
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
+
 }

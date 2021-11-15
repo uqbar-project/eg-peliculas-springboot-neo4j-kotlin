@@ -17,7 +17,7 @@ class Pelicula {
     lateinit var titulo: String
 
     @Property("tagline")
-    lateinit var frase: String
+    var frase: String? = null
 
     @Property("released")
     var anio: Int = 0
@@ -39,7 +39,7 @@ class Pelicula {
     }
 
     fun validar() {
-        if (this.titulo.trim().isNullOrEmpty()) {
+        if (this.titulo.trim().isEmpty()) {
             throw UserException("Debe ingresar un título")
         }
         if (this.anio <= MINIMO_VALOR_ANIO) {

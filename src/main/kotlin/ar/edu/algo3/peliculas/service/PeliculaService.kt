@@ -23,6 +23,7 @@ class PeliculaService {
 
     @Transactional
     fun guardar(pelicula: Pelicula): Pelicula {
+        pelicula.validar()
         peliculasRepository.save(pelicula)
         return pelicula
     }
