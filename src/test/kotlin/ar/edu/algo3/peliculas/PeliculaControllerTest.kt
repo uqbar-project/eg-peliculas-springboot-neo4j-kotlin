@@ -7,7 +7,7 @@ import ar.edu.algo3.peliculas.repository.ActoresRepository
 import ar.edu.algo3.peliculas.repository.PeliculasRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.*
-import org.neo4j.driver.springframework.boot.test.autoconfigure.Neo4jTestHarnessAutoConfiguration
+//import org.neo4jProperties.driver.springframework.boot.test.autoconfigure.Neo4jTestHarnessAutoConfiguration
 import org.neo4j.harness.Neo4j
 import org.neo4j.harness.Neo4jBuilders
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@EnableAutoConfiguration(exclude = [Neo4jTestHarnessAutoConfiguration::class])
+@EnableAutoConfiguration // (exclude = [Neo4jTestHarnessAutoConfiguration::class])
 class PeliculaControllerTest {
     @Autowired
     lateinit var peliculasRepository: PeliculasRepository
@@ -253,7 +253,7 @@ class PeliculaControllerTest {
             titulo = "una peli"
             anio = 1490
         }
-        val result = mockMvc.perform(
+        mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(peliculaConError))
@@ -266,7 +266,8 @@ class PeliculaControllerTest {
         val peliculaConError = Pelicula().apply {
             titulo = "una peli"
             anio = 1990
-            personajes = mutableListOf(Personaje().apply { actor = Actor().apply { nombreCompleto = "Ricardo Darín "}})
+            personajes =
+                mutableListOf(Personaje().apply { actor = Actor().apply { nombreCompleto = "Ricardo Darín " } })
         }
         mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
@@ -281,7 +282,7 @@ class PeliculaControllerTest {
         val peliculaConError = Pelicula().apply {
             titulo = "una peli"
             anio = 1990
-            personajes = mutableListOf(Personaje().apply { roles = mutableListOf("Cacho")})
+            personajes = mutableListOf(Personaje().apply { roles = mutableListOf("Cacho") })
         }
         mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
