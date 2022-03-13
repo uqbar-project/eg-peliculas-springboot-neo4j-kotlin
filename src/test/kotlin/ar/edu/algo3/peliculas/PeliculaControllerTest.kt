@@ -68,7 +68,7 @@ class PeliculaControllerTest {
     @BeforeEach
     fun init() {
         val darin = Actor().apply {
-            nombreCompleto = "Ricardo Darín"
+            nombreCompleto = "Ricardo Darin"
             anioNacimiento = 1957
         }
         nueveReinas = peliculasRepository.save(Pelicula().apply {
@@ -83,7 +83,7 @@ class PeliculaControllerTest {
                 Personaje().apply {
                     roles = mutableListOf("Juan")
                     actor = Actor().apply {
-                        nombreCompleto = "Gastón Pauls"
+                        nombreCompleto = "Gaston Pauls"
                         anioNacimiento = 1972
                     }
                 }
@@ -126,7 +126,7 @@ class PeliculaControllerTest {
             .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("Nueve reinas"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(2))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].actor.nombreCompleto").value("Ricardo Darín"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].actor.nombreCompleto").value("Ricardo Darin"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].roles[0]").value("Marcos"))
     }
 
