@@ -170,7 +170,7 @@ La parte interesante es que
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@EnableAutoConfiguration(exclude = [Neo4jTestHarnessAutoConfiguration::class])
+@EnableAutoConfiguration
 class PeliculaControllerTest {
     @Autowired
     lateinit var peliculasRepository: PeliculasRepository
@@ -255,7 +255,7 @@ class PeliculaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].titulo").value("Nueve reinas"))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].personajes.length()").value(0))

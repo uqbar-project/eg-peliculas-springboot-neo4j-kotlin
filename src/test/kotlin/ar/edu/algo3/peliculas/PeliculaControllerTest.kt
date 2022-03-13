@@ -7,7 +7,6 @@ import ar.edu.algo3.peliculas.repository.ActoresRepository
 import ar.edu.algo3.peliculas.repository.PeliculasRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.*
-//import org.neo4jProperties.driver.springframework.boot.test.autoconfigure.Neo4jTestHarnessAutoConfiguration
 import org.neo4j.harness.Neo4j
 import org.neo4j.harness.Neo4jBuilders
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@EnableAutoConfiguration // (exclude = [Neo4jTestHarnessAutoConfiguration::class])
+@EnableAutoConfiguration
 class PeliculaControllerTest {
     @Autowired
     lateinit var peliculasRepository: PeliculasRepository
