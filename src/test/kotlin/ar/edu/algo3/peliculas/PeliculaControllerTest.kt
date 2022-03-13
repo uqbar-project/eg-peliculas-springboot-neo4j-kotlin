@@ -68,7 +68,7 @@ class PeliculaControllerTest {
     @BeforeEach
     fun init() {
         val darin = Actor().apply {
-            nombreCompleto = "Ricardo Darin"
+            nombreCompleto = "Ricardo Darín"
             anioNacimiento = 1957
         }
         nueveReinas = peliculasRepository.save(Pelicula().apply {
@@ -83,7 +83,7 @@ class PeliculaControllerTest {
                 Personaje().apply {
                     roles = mutableListOf("Juan")
                     actor = Actor().apply {
-                        nombreCompleto = "Gaston Pauls"
+                        nombreCompleto = "Gastón Pauls"
                         anioNacimiento = 1972
                     }
                 }
@@ -110,7 +110,7 @@ class PeliculaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].titulo").value("Nueve reinas"))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].personajes.length()").value(0))
@@ -123,10 +123,10 @@ class PeliculaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("Nueve reinas"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(2))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].actor.nombreCompleto").value("Ricardo Darin"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].actor.nombreCompleto").value("Ricardo Darín"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[0].roles[0]").value("Marcos"))
     }
 
@@ -145,7 +145,7 @@ class PeliculaControllerTest {
                 .content(mapper.writeValueAsString(nueveReinas))
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("9 Reinas"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(3))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes[2].actor.nombreCompleto").value("Leticia Brédice"))
@@ -174,7 +174,7 @@ class PeliculaControllerTest {
                 .content(mapper.writeValueAsString(plataDulce))
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("Plata Dulce"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(2))
 
@@ -194,7 +194,7 @@ class PeliculaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(0))
 
     }
@@ -299,7 +299,7 @@ class PeliculaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].nombreCompleto").value("Ricardo Darín"))
     }
