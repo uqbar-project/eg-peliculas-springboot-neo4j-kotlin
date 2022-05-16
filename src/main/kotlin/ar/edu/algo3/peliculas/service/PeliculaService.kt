@@ -24,15 +24,14 @@ class PeliculaService {
     @Transactional
     fun guardar(pelicula: Pelicula): Pelicula {
         pelicula.validar()
-        peliculasRepository.save(pelicula)
-        return pelicula
+        return peliculasRepository.save(pelicula)
     }
 
     @Transactional
-    fun eliminar(idPelicula: Long): String {
+    fun eliminar(idPelicula: Long): Pelicula {
         val pelicula = buscarPorId(idPelicula)
         peliculasRepository.delete(pelicula)
-        return "La película ${pelicula.titulo} fue eliminada con éxito"
+        return pelicula
     }
 
 }
