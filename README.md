@@ -1,6 +1,7 @@
 # Ejemplo Películas con Springboot y Neo4J
 
 [![build](https://github.com/uqbar-project/eg-peliculas-springboot-neo4j-kotlin/actions/workflows/build.yml/badge.svg)](https://github.com/uqbar-project/eg-peliculas-springboot-neo4j-kotlin/actions/workflows/build.yml) [![codecov](https://codecov.io/gh/uqbar-project/eg-peliculas-springboot-neo4j-kotlin/branch/master/graph/badge.svg?token=if2lwvmcwi)](https://codecov.io/gh/uqbar-project/eg-peliculas-springboot-neo4j-kotlin)
+
 ## Objetivo
 
 Testea el mapeo de una API que expone la [base de grafos de Películas que viene con Neo4J](https://neo4j.com/developer/example-project/).

@@ -18,7 +18,7 @@ repositories {
     mavenCentral()
 }
 
-val springVersion = "2.6.4"
+val springVersion = "2.6.7"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter:$springVersion")
@@ -27,11 +27,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-neo4j:$springVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
     implementation("org.springframework.boot:spring-boot-devtools:$springVersion")
     testImplementation("org.springframework.boot:spring-boot-starter-test:$springVersion")
-    testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.2.31")
-    testImplementation("org.neo4j.test:neo4j-harness:4.4.4")
+    testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.2.33")
+    testImplementation("org.neo4j.test:neo4j-harness:4.4.6")
     testImplementation("org.neo4j.driver:neo4j-java-driver-test-harness-spring-boot-autoconfigure:4.3.6.0")
 }
 
