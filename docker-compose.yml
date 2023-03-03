@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  neo4j:
+    image: neo4j:latest
+    restart: unless-stopped
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./data/peliculas/conf:/var/lib/neo4j/conf
+      - ./data/peliculas/data:/var/lib/neo4j/data
+      - ./data/peliculas/import:/var/lib/neo4j/import
+      - ./data/peliculas/logs:/var/lib/neo4j/logs
+      - ./data/peliculas/plugins:/var/lib/neo4j/plugins
+    environment:
+      # Raise memory limits
+      server.memory.pagecache.size: 1G
+      server.memory.heap.max_size: 1G
+      # auth
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_AUTH: neo4j/passw0rd

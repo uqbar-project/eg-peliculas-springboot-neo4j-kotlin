@@ -14,16 +14,26 @@ El ejemplo Movies que viene con Neo4j propone
 * un nodo para cada actor (Person)
 * y la relación entre ellos, marcada por el o los roles que cumplió cada actor en una película (ACTED_IN)
 
-## Carga inicial de datos
+## Prerrequisitos
 
-Instalar previamente Neo4j o bien levantar una imagen de Docker
+Solo hace falta tener instalado [Docker](https://www.docker.com/)
+
+## Instalación
+
+Para poder ejecutar el ejemplo abrí una consola de comandos y escribí
 
 ```bash
-docker run -p7474:7474 -p7687:7687 -e NEO4J_AUTH=neo4j/s3cr3t neo4j
+docker-compose up
 ```
 
-- Abrir el Navegador de Neo4J Desktop o bien ingresar manualmente a la URL: http://localhost:7474
-- Ejecutar el script que carga el grafo de películas (viene como ejemplo)
+Eso va a levantar
+
+- el servidor Neo4j en el puerto 7687
+- y el cliente Neo4j en el puerto 7474
+
+## Carga inicial de datos
+
+Ingresando en un navegador a `http://localhost:7474/` te podés conectar a la base utilizando el usuario `neo4j` y la contraseña `passw0rd` (ojo que es un cero y no una o). Luego tenés que ejecutar el script que carga el grafo de películas (viene como ejemplo).
 
 ![script inicial](./images/scriptInicial.gif)
 
@@ -46,7 +56,7 @@ logging:
 
 Algunas consideraciones:
 
-- la contraseña por defecto cuando instalás localmente Neo4J es **neo4j** pero a veces te obliga a cambiarla, acordate de sincronizar con esta configuración (de hecho en el ejemplo de Docker estamos usando s3cr3t)
+- la contraseña por defecto cuando instalás localmente Neo4J es **neo4j** pero a veces te obliga a cambiarla, acordate de sincronizar con esta configuración (de hecho en el ejemplo de Docker estamos usando passw0rd)
 - el puerto por defecto para el protocolo bolt es 7687
 - respecto al logging, le pusimos una configuración bastante exhaustiva: vas a ver conexiones y queries a la base. Se puede desactivar subiendo el nivel a INFO, WARN o directamente borrando la línea
 
@@ -116,7 +126,7 @@ fun guardar(pelicula: Pelicula): Pelicula {
 }
 ```
 
-los métodos de CRUD (Create, Retrieve, Update, Delete) ni siquiera es necesario que los defina nuestra interfaz, porque ya están siendo inyectados por la interfaz Neo4jRepository (la declaratividad en su máxima expresión). El motor, en este caso Spring boot, persiste el nodo película y [cualquier relación hasta el nivel de profundidad 5 que no entre en referencia circular](https://community.neo4j.com/t/repository-save-find-depth/15181). Anteriormente, existía un SessionManager donde podíamos tener un mayor control de la información que actualizábamos o recuperábamos: para algunos esto puede ser una desventaja, contra lo bueno que puede suponer delegar esa responsabilidad en un algoritmo optimizado.
+Los métodos de CRUD (Create, Retrieve, Update, Delete) ni siquiera es necesario que los defina nuestra interfaz, porque ya están siendo inyectados por la interfaz Neo4jRepository (la declaratividad en su máxima expresión). El motor, en este caso Spring boot, persiste el nodo película y [cualquier relación hasta el nivel de profundidad 5 que no entre en referencia circular](https://community.neo4j.com/t/repository-save-find-depth/15181). Anteriormente, existía un SessionManager donde podíamos tener un mayor control de la información que actualizábamos o recuperábamos: para algunos esto puede ser una desventaja, contra lo bueno que puede suponer delegar esa responsabilidad en un algoritmo optimizado.
 
 ## Mapeos
 
@@ -275,6 +285,10 @@ Como de costumbre, pueden investigar los endpoints en el navegador mediante la s
 ```url
 http://localhost:8080/swagger-ui/index.html#
 ```
+
+## Resumen de la arquitectura
+
+![arquitectura películas](./images/arquitectura-app.png)
 
 ## Cómo testear la aplicación en Insomnia
 
