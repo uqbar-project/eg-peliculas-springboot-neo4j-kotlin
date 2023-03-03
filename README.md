@@ -286,6 +286,10 @@ Como de costumbre, pueden investigar los endpoints en el navegador mediante la s
 http://localhost:8080/swagger-ui/index.html#
 ```
 
+## Resumen de la arquitectura
+
+![arquitectura películas](./images/arquitectura-app.png)
+
 ## Cómo testear la aplicación en Insomnia
 
 Te dejamos [el archivo de Insomnia](./Peliculas_Insomnia.json) con ejemplos para probarlo.
