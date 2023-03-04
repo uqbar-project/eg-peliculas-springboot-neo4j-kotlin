@@ -42,12 +42,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.2.39")
     testImplementation("org.neo4j.test:neo4j-harness:5.5.0")
-//    testImplementation("org.neo4j.driver:neo4j-java-driver-test-harness-spring-boot-autoconfigure:5.5.0")
     testImplementation("org.springframework.boot:spring-boot-autoconfigure:3.0.3")
 }
 
 configurations {
-    all {
+    testImplementation {
         exclude("org.springframework.boot","spring-boot-starter-logging")
         exclude("ch.qos.logback", "logback-classic")
     }

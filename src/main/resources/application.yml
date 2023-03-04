@@ -6,5 +6,6 @@ spring:
       password: passw0rd
 logging:
   level:
-    org.springframework.data: DEBUG
+    org.springframework.data: INFO
     org.neo4j: DEBUG
+    ch.qos.logback: INFO
