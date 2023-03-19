@@ -16,14 +16,14 @@ El ejemplo Movies que viene con Neo4j propone
 
 ## Prerrequisitos
 
-Solo hace falta tener instalado [Docker](https://www.docker.com/)
+Solo hace falta tener instalado Docker Desktop (el pack docker engine y docker compose), seguí las instrucciones de [esta página](https://phm.uqbar-project.org/material/software) en el párrafo `Docker`.
 
 ## Instalación
 
 Para poder ejecutar el ejemplo abrí una consola de comandos y escribí
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 Eso va a levantar
