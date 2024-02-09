@@ -13,7 +13,7 @@ class Pelicula {
     @Id @GeneratedValue
     var id: Long? = null
 
-    @Property(name="title") // OJO, no es la property de xtend sino la de OGM
+    @Property(name="title")
     lateinit var titulo: String
 
     @Property("tagline")

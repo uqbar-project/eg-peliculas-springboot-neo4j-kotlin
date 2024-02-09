@@ -1,26 +1,25 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "3.0.2"
-    id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.8.10"
-    kotlin("plugin.spring") version "1.8.10"
-    kotlin("plugin.jpa") version "1.8.10"
+    id("org.springframework.boot") version "3.2.2"
+    id("io.spring.dependency-management") version "1.1.4"
+    kotlin("jvm") version "1.9.22"
+    kotlin("plugin.spring") version "1.9.22"
+    kotlin("plugin.jpa") version "1.9.22"
     jacoco
 }
 
-extra["springCloudVersion"] = "2022.0.0"
-
 group = "org.uqbar"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
     // básicos de cualquier proyecto Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-hateoas")
@@ -28,21 +27,23 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.springframework.boot:spring-boot-starter-web-services")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2")
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.14")
-    implementation("org.springframework.boot:spring-boot-devtools")
 
-    // conexión a la base
+    // conexión a la base de datos
     implementation("org.springframework.boot:spring-boot-starter-data-neo4j")
 
     // testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.2.39")
-    testImplementation("org.neo4j.test:neo4j-harness:5.5.0")
-    testImplementation("org.springframework.boot:spring-boot-autoconfigure:3.0.3")
+    testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.3.3")
+    testImplementation("org.neo4j.test:neo4j-harness:5.16.0")
+    testImplementation("org.springframework.boot:spring-boot-autoconfigure")
+
+    // logging
+    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    modules {
+        module("org.springframework.boot:spring-boot-starter-logging") {
+            replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
+        }
+    }
 }
 
 configurations {
@@ -52,16 +53,10 @@ configurations {
     }
 }
 
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-    }
-}
-
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
 }
 
@@ -78,7 +73,7 @@ tasks.jacocoTestReport {
 }
 
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.11"
 }
 
 tasks.jacocoTestReport {
