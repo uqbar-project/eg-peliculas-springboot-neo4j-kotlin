@@ -16,7 +16,7 @@ El ejemplo Movies que viene con Neo4j propone
 
 ## Prerrequisitos
 
-Solo hace falta tener instalado Docker Desktop (el pack docker engine y docker compose), seguí las instrucciones de [esta página](https://phm.uqbar-project.org/material/software) en el párrafo `Docker`.
+Solo hace falta tener instalado algún desktop de Docker, seguí las instrucciones de [esta página](https://phm.uqbar-project.org/material/software) en el párrafo `Docker`.
 
 ## Instalación
 
@@ -43,15 +43,11 @@ En el archivo [`application.yml`](./src/main/resources/application.yml) encontra
 
 ```yml
 spring:
-  data:
-    neo4j:
-      uri: bolt://localhost:7687
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
       username: neo4j
       password: #####
-logging:
-  level:
-    org.springframework.data: DEBUG
-    org.neo4j: DEBUG
 ```
 
 Algunas consideraciones:
@@ -99,10 +95,41 @@ En este caso solo queremos traer el nodo película, sin sus relaciones, por lo q
 Cuando nos pasen un identificador de una película concreta, ahora sí queremos traer los datos de la película, más sus personajes y eso incluye los datos de cada uno de sus actores:
 
 ```cypher
-MATCH (pelicula:Movie)<-[actuo_en:ACTED_IN]-(persona:Person) WHERE ID(pelicula) = $id RETURN pelicula, collect(actuo_en), collect(persona) LIMIT 1
+MATCH (pelicula:Movie)<-[actuo_en:ACTED_IN]-(persona:Person) WHERE ELEMENTID(pelicula) = $id RETURN pelicula, collect(actuo_en), collect(persona) LIMIT 1
 ```
 
 Es importante utilizar la instrucción [`collect`](https://neo4j.com/docs/cypher-manual/current/functions/aggregating/#functions-collect) para que agrupe correctamente los personajes y los actores.
+
+### Id vs. elementId
+
+> Otro dato importante es que a partir de la versión 5 de Neo4J, **el uso de identificadores Long que mapean contra el id de la base de grafos está deprecada**. Esto significa que lo ideal es utilizar otro campo, *elementId* que consiste en un UUID.
+
+En las consultas utilizaremos `ELEMENTID` como función y no `ID`:
+
+![Element ID en la base de grafos](./images/elementId.png)
+
+En este ejemplo, el campo `identity` 55 no se utiliza en las consultas sino `4:25afcd88-3464-440f-a311-a6d8322f3a7c:55`. Esto se da principalmente porque 
+
+Para eso es muy importante agregar esta configuración:
+
+```kt
+@Configuration
+class Neo4jConfiguration {
+
+    @Bean
+    fun cypherDslConfiguration(): CypherConfiguration =
+        CypherConfiguration.newConfig().withDialect(Dialect.NEO4J_5).build()
+
+}
+```
+
+De lo contrario, cuando quieras definir un Id como String se va a quejar cuando quieras persistir un UUID (al actualizar o crear):
+
+```bash
+java.lang.ClassCastException: Cannot cast java.lang.Long to java.lang.String
+	at java.base/java.lang.Class.cast(Class.java:4067) ~[?:?]
+	at ar.edu.algo3.peliculas.domain.Pelicula_Accessor_iy86bw.setProperty(Unknown Source) ~[main/:?]
+```
 
 ### Actualizaciones a una película
 
