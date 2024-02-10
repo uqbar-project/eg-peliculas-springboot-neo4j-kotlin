@@ -319,4 +319,4 @@ http://localhost:8080/swagger-ui/index.html#
 
 ## Cómo testear la aplicación en Insomnia
 
-Te dejamos [el archivo de Insomnia](./Peliculas_Insomnia.json) con ejemplos para probarlo.
+Te dejamos [el archivo de Insomnia](./Peliculas_Insomnia.json) con ejemplos para probarlo. También está la [versión en formato HAR](./Peliculas.har), que es compatible con otros clientes Http como POSTMAN.
