@@ -18,7 +18,7 @@ class PeliculaService {
         peliculasRepository.peliculasPorTitulo(titulo.contiene())
 
     @Transactional(readOnly = true)
-    fun buscarPorId(id: Long) =
+    fun buscarPorId(id: String) =
         peliculasRepository.pelicula(id).orElseThrow { NotFoundException("La pelicula con identificador $id no existe")}
 
     @Transactional
@@ -28,7 +28,7 @@ class PeliculaService {
     }
 
     @Transactional
-    fun eliminar(idPelicula: Long): Pelicula {
+    fun eliminar(idPelicula: String): Pelicula {
         val pelicula = buscarPorId(idPelicula)
         peliculasRepository.delete(pelicula)
         return pelicula

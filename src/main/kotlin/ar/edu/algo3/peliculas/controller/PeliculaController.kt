@@ -17,11 +17,11 @@ class PeliculaController {
         peliculaService.buscarPorTitulo(titulo)
 
     @GetMapping("/pelicula/{id}")
-    fun getPelicula(@PathVariable id: Long) =
+    fun getPelicula(@PathVariable id: String) =
         peliculaService.buscarPorId(id)
 
     @PutMapping("/pelicula/{id}")
-    fun updatePelicula(@PathVariable id: Long, @RequestBody pelicula: Pelicula): Pelicula {
+    fun updatePelicula(@PathVariable id: String, @RequestBody pelicula: Pelicula): Pelicula {
         peliculaService.buscarPorId(id)
         return peliculaService.guardar(pelicula)
     }
@@ -31,7 +31,7 @@ class PeliculaController {
         peliculaService.guardar(pelicula)
 
     @DeleteMapping("/pelicula/{id}")
-    fun deletePelicula(@PathVariable id: Long) =
+    fun deletePelicula(@PathVariable id: String) =
         peliculaService.eliminar(id)
 
 }

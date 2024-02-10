@@ -11,7 +11,7 @@ const val MINIMO_VALOR_ANIO = 1900
 class Pelicula {
 
     @Id @GeneratedValue
-    var id: Long? = null
+    var id: String? = null
 
     @Property(name="title")
     lateinit var titulo: String

@@ -9,7 +9,7 @@ import org.springframework.data.neo4j.core.schema.TargetNode
 @RelationshipProperties
 class Personaje {
     @Id @GeneratedValue
-    var id: Long? = null
+    var id: String? = null
     var roles = mutableListOf<String>()
 
     @TargetNode

@@ -8,7 +8,7 @@ import org.springframework.data.neo4j.core.schema.Property
 @Node("Person")
 class Actor {
     @Id @GeneratedValue
-    var id: Long? = null
+    var id: String? = null
 
     @Property("name")
     lateinit var nombreCompleto: String
