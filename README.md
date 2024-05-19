@@ -108,7 +108,7 @@ En las consultas utilizaremos `ELEMENTID` como función y no `ID`:
 
 ![Element ID en la base de grafos](./images/elementId.png)
 
-En este ejemplo, el campo `identity` 55 no se utiliza en las consultas sino `4:25afcd88-3464-440f-a311-a6d8322f3a7c:55`. Esto se da principalmente porque 
+En este ejemplo, el campo `identity` 55 no se utiliza en las consultas sino `4:25afcd88-3464-440f-a311-a6d8322f3a7c:55`. Esto evita ciertos problemas históricos que ocurrían dado que los ids numéricos se vuelven a utilizar cuando eliminamos los nodos.
 
 Para eso es muy importante agregar esta configuración:
 
@@ -153,7 +153,7 @@ fun guardar(pelicula: Pelicula): Pelicula {
 }
 ```
 
-Los métodos de CRUD (Create, Retrieve, Update, Delete) ni siquiera es necesario que los defina nuestra interfaz, porque ya están siendo inyectados por la interfaz Neo4jRepository (la declaratividad en su máxima expresión). El motor, en este caso Spring boot, persiste el nodo película y [cualquier relación hasta el nivel de profundidad 5 que no entre en referencia circular](https://community.neo4j.com/t/repository-save-find-depth/15181). Anteriormente, existía un SessionManager donde podíamos tener un mayor control de la información que actualizábamos o recuperábamos: para algunos esto puede ser una desventaja, contra lo bueno que puede suponer delegar esa responsabilidad en un algoritmo optimizado.
+Los métodos de CRUD (Create, Retrieve, Update, Delete) ni siquiera es necesario que los defina nuestra interfaz, porque ya están siendo inyectados por la interfaz Neo4jRepository (la declaratividad en su máxima expresión). El motor, en este caso Springboot, persiste el nodo película y [cualquier relación hasta el nivel de profundidad 5 que no entre en referencia circular](https://community.neo4j.com/t/repository-save-find-depth/15181). Anteriormente, existía un SessionManager donde podíamos tener un mayor control de la información que actualizábamos o recuperábamos: para algunos esto puede ser una desventaja, contra lo bueno que puede suponer delegar esa responsabilidad en un algoritmo optimizado.
 
 ## Mapeos
 
@@ -166,7 +166,7 @@ class Pelicula {
     @Id @GeneratedValue
     var id: Long? = null
 
-    @Property(name="title") // OJO, no es la property de xtend sino la de OGM
+    @Property(name="title")
     lateinit var titulo: String
 
     @Property("tagline")
@@ -179,11 +179,7 @@ class Pelicula {
     var personajes: MutableList<Personaje> = mutableListOf()
 ```
 
-Para profundizar más recomendamos ver los otros objetos de dominio en este ejemplo y [la página de mapeos de Neo4j - Spring boot](https://docs.spring.io/spring-data/neo4j/docs/current/reference/html/#mapping)
-
-## Sobre los identificadores
-
-Por motivos didácticos hemos mantenido un ID Long que es el que genera Neo4J para sus nodos, aunque [**no resulta una buena estrategia**](https://stackoverflow.com/questions/27336536/reuse-of-deleted-nodes-ids-in-neo4j), ya que cuando eliminamos nodos, Neo4j reutiliza esos identificadores para los nodos nuevos. Recomendamos investigar mecanismos alternativos para generar claves primarias, o bien tener como estrategia el borrado lógico y no físico.
+Para profundizar más recomendamos ver los otros objetos de dominio en este ejemplo y [la página de mapeos de Neo4j - Spring boot](https://docs.spring.io/spring-data/neo4j/reference/object-mapping/metadata-based-mapping.html)
 
 ## Tests de integración
 
@@ -304,14 +300,6 @@ class PeliculaControllerTest {
 ```
 
 Para profundizar más en el tema recomendamos leer [esta página](https://medium.com/neo4j/testing-your-neo4j-based-java-application-34bef487cc3c)
-
-## Open API / Swagger
-
-Como de costumbre, pueden investigar los endpoints en el navegador mediante la siguiente URL:
-
-```url
-http://localhost:8080/swagger-ui/index.html#
-```
 
 ## Resumen de la arquitectura
 
