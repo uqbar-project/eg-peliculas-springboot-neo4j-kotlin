@@ -1,17 +1,20 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    id("org.springframework.boot") version "3.2.2"
-    id("io.spring.dependency-management") version "1.1.4"
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.spring") version "1.9.22"
-    kotlin("plugin.jpa") version "1.9.22"
+    id("org.springframework.boot") version "3.4.2"
+    id("io.spring.dependency-management") version "1.1.7"
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    kotlin("plugin.jpa") version "1.9.25"
     jacoco
 }
 
 group = "org.uqbar"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_21
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 repositories {
     mavenCentral()
@@ -33,8 +36,8 @@ dependencies {
 
     // testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.3.3")
-    testImplementation("org.neo4j.test:neo4j-harness:5.16.0")
+    testImplementation("org.neo4j:neo4j-ogm-embedded-driver:3.3.5")
+    testImplementation("org.neo4j.test:neo4j-harness:2025.01.0")
     testImplementation("org.springframework.boot:spring-boot-autoconfigure")
 
     // logging
@@ -53,13 +56,6 @@ configurations {
     }
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "21"
-    }
-}
-
 tasks.withType<Test> {
     useJUnitPlatform()
 }
@@ -73,7 +69,7 @@ tasks.jacocoTestReport {
 }
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "0.8.12"
 }
 
 tasks.jacocoTestReport {

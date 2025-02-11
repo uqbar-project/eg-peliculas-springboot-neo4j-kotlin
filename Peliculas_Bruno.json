@@ -1,0 +1,150 @@
+{
+  "name": "Películas - Neo4J",
+  "version": "1",
+  "items": [
+    {
+      "type": "http",
+      "name": "Eliminar una película",
+      "seq": 1,
+      "request": {
+        "url": "http://localhost:8080/pelicula/4:25afcd88-3464-440f-a311-a6d8322f3a7c:177",
+        "method": "DELETE",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Crear una película",
+      "seq": 2,
+      "request": {
+        "url": "http://localhost:8080/pelicula",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"titulo\": \"Plata Dulce\",\n  \"anio\": 1982,\n  \"frase\": \"\",\n  \"personajes\": [\n    {\n      \"actor\": {\n         \"nombreCompleto\": \"Federico Luppi\",\n         \"anioNacimiento\": 1936\n      },\n      \"roles\": [\n        \"Carlos Bonifatti\"\n      ]\n    },\n    {\n      \"actor\": {\n         \"nombreCompleto\": \"Julio de Grazia\",\n         \"anioNacimiento\": 1929\n      },\n      \"roles\": [\n        \"Rubén Molinuevo\"\n      ]\n    }\n  ]\n}",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Actualizar una película",
+      "seq": 3,
+      "request": {
+        "url": "http://localhost:8080/pelicula/4:25afcd88-3464-440f-a311-a6d8322f3a7c:177",
+        "method": "PUT",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json",
+            "enabled": true
+          }
+        ],
+        "params": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"titulo\": \"Plata Dulce\",\n  \"anio\": 1981,\n  \"frase\": \"\",\n  \"personajes\": [\n    {\n      \"actor\": {\n         \"nombreCompleto\": \"Federico Luppi\",\n         \"anioNacimiento\": 1936\n      },\n      \"roles\": [\n        \"Carlos Bonifatti\"\n      ]\n    },\n    {\n      \"actor\": {\n         \"nombreCompleto\": \"Julio de Grazia\",\n         \"anioNacimiento\": 1929\n      },\n      \"roles\": [\n        \"Rubén Molinuevo\"\n      ]\n    }\n  ]\n}",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Ver película por identificador",
+      "seq": 4,
+      "request": {
+        "url": "http://localhost:8080/pelicula/4:25afcd88-3464-440f-a311-a6d8322f3a7c:3",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    },
+    {
+      "type": "http",
+      "name": "Ver películas por título",
+      "seq": 5,
+      "request": {
+        "url": "http://localhost:8080/peliculas/ma",
+        "method": "GET",
+        "headers": [],
+        "params": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "docs": "",
+        "auth": {
+          "mode": "none"
+        }
+      }
+    }
+  ],
+  "environments": [],
+  "brunoConfig": {
+    "version": "1",
+    "name": "Películas - Neo4J",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ]
+  }
+}

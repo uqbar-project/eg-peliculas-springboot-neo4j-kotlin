@@ -180,7 +180,7 @@ class Pelicula {
 ```
 
 Para profundizar más recomendamos ver los otros objetos de dominio en este ejemplo y [la página de mapeos de Neo4j - Spring boot](https://docs.spring.io/spring-data/neo4j/reference/object-mapping/metadata-based-mapping.html)
-
+    
 ## Tests de integración
 
 Elegimos hacer tests de integración sobre el controller
@@ -305,6 +305,10 @@ Para profundizar más en el tema recomendamos leer [esta página](https://medium
 
 ![arquitectura películas](./images/arquitectura-app.png)
 
-## Cómo testear la aplicación en Insomnia
+## Cómo testear la aplicación
 
-Te dejamos [el archivo de Insomnia](./Peliculas_Insomnia.json) con ejemplos para probarlo. También está la [versión en formato HAR](./Peliculas.har), que es compatible con otros clientes Http como POSTMAN.
+Te dejamos ejemplos para probarlo en 
+
+- [Bruno](./Peliculas_Bruno.json)
+- [Postman](./Peliculas_Postman.json)
+- [Insomnia](./Peliculas_Insomnia.json)

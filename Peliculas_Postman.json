@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "Películas - Neo4J",
+    "description": "",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "bruno",
+      "event": []
+    },
+    {
+      "name": "Eliminar una película",
+      "event": [],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "auth": null,
+        "description": "",
+        "url": {
+          "raw": "http://localhost:8080/pelicula/4:25afcd88-3464-440f-a311-a6d8322f3a7c:177",
+          "protocol": "http",
+          "host": [
+            "localhost:8080"
+          ],
+          "path": [
+            "pelicula",
+            "4:25afcd88-3464-440f-a311-a6d8322f3a7c:177"
+          ],
+          "query": [],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Crear una película",
+      "event": [],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          }
+        ],
+        "auth": null,
+        "description": "",
+        "url": {
+          "raw": "http://localhost:8080/pelicula",
+          "protocol": "http",
+          "host": [
+            "localhost:8080"
+          ],
+          "path": [
+            "pelicula"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"titulo\": \"Plata Dulce\",\n\t\"anio\": 1982,\n  \"frase\": \"\",\n\t\"personajes\": [\n\t\t{\n\t\t\t\"actor\": {\n\t\t\t\t \"nombreCompleto\": \"Federico Luppi\",\n\t\t\t\t \"anioNacimiento\": 1936\n\t\t\t},\n\t\t\t\"roles\": [\n\t\t\t\t\"Carlos Bonifatti\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"actor\": {\n\t\t\t\t \"nombreCompleto\": \"Julio de Grazia\",\n\t\t\t\t \"anioNacimiento\": 1929\n\t\t\t},\n\t\t\t\"roles\": [\n\t\t\t\t\"Rubén Molinuevo\"\n\t\t\t]\n\t\t}\n\t]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Actualizar una película",
+      "event": [],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "disabled": false,
+            "type": "default"
+          }
+        ],
+        "auth": null,
+        "description": "",
+        "url": {
+          "raw": "http://localhost:8080/pelicula/4:25afcd88-3464-440f-a311-a6d8322f3a7c:177",
+          "protocol": "http",
+          "host": [
+            "localhost:8080"
+          ],
+          "path": [
+            "pelicula",
+            "4:25afcd88-3464-440f-a311-a6d8322f3a7c:177"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"titulo\": \"Plata Dulce\",\n\t\"anio\": 1981,\n  \"frase\": \"\",\n\t\"personajes\": [\n\t\t{\n\t\t\t\"actor\": {\n\t\t\t\t \"nombreCompleto\": \"Federico Luppi\",\n\t\t\t\t \"anioNacimiento\": 1936\n\t\t\t},\n\t\t\t\"roles\": [\n\t\t\t\t\"Carlos Bonifatti\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"actor\": {\n\t\t\t\t \"nombreCompleto\": \"Julio de Grazia\",\n\t\t\t\t \"anioNacimiento\": 1929\n\t\t\t},\n\t\t\t\"roles\": [\n\t\t\t\t\"Rubén Molinuevo\"\n\t\t\t]\n\t\t}\n\t]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Ver película por identificador",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": null,
+        "description": "",
+        "url": {
+          "raw": "http://localhost:8080/pelicula/4:25afcd88-3464-440f-a311-a6d8322f3a7c:3",
+          "protocol": "http",
+          "host": [
+            "localhost:8080"
+          ],
+          "path": [
+            "pelicula",
+            "4:25afcd88-3464-440f-a311-a6d8322f3a7c:3"
+          ],
+          "query": [],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Ver películas por título",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": null,
+        "description": "",
+        "url": {
+          "raw": "http://localhost:8080/peliculas/ma",
+          "protocol": "http",
+          "host": [
+            "localhost:8080"
+          ],
+          "path": [
+            "peliculas",
+            "ma"
+          ],
+          "query": [],
+          "variable": []
+        }
+      }
+    }
+  ],
+  "variable": []
+}
