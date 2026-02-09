@@ -15,10 +15,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.testcontainers.containers.Neo4jContainer
+import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.time.Duration
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,6 +42,24 @@ class PeliculaControllerTest {
 
     companion object {
         var objectMapper = ObjectMapper()
+
+        @Container
+        @JvmStatic
+        val contenedorNeo4j = Neo4jContainer("neo4j:5.12.0")
+            .withAdminPassword("passwordSuperSegura")
+            // CI es lento, le damos hasta 2 minutos para arrancar
+            .withStartupTimeout(Duration.ofMinutes(2))
+            // Limitamos memoria para que el runner de GitHub no lo mate (OOM)
+            .withEnv("NEO4J_dbms_memory_pagecache_size", "512M")
+            .withEnv("NEO4J_dbms_memory_heap_max__size", "512M")
+
+        @DynamicPropertySource
+        @JvmStatic
+        fun propiedadesNeo4j(registroDePropiedades: DynamicPropertyRegistry) {
+            registroDePropiedades.add("spring.neo4j.uri") { contenedorNeo4j.boltUrl }
+            registroDePropiedades.add("spring.neo4j.authentication.username") { "neo4j" }
+            registroDePropiedades.add("spring.neo4j.authentication.password") { contenedorNeo4j.adminPassword }
+        }
     }
 
     lateinit var nueveReinas: Pelicula
