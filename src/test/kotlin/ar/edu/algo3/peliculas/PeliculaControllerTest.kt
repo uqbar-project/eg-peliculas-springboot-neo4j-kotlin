@@ -6,9 +6,9 @@ import ar.edu.algo3.peliculas.domain.Personaje
 import ar.edu.algo3.peliculas.repository.ActoresRepository
 import ar.edu.algo3.peliculas.repository.PeliculasRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.*
-import org.neo4j.harness.Neo4j
-import org.neo4j.harness.Neo4jBuilders
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -20,11 +20,16 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.testcontainers.containers.Neo4jContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
+import java.time.Duration
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @EnableAutoConfiguration
+@Testcontainers
 class PeliculaControllerTest {
     @Autowired
     lateinit var peliculasRepository: PeliculasRepository
@@ -36,37 +41,32 @@ class PeliculaControllerTest {
     lateinit var mockMvc: MockMvc
 
     companion object {
-        var mapper = ObjectMapper()
-        lateinit var embeddedDatabaseServer: Neo4j
+        var objectMapper = ObjectMapper()
 
-        @BeforeAll
+        @Container
         @JvmStatic
-        fun initializeNeo4j() {
-            embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
-                .withDisabledServer()
-                .build()
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun stopNeo4j() {
-            embeddedDatabaseServer.close()
-        }
+        val contenedorNeo4j = Neo4jContainer("neo4j:5.12.0")
+            .withAdminPassword("passwordSuperSegura")
+            // CI es lento, le damos hasta 2 minutos para arrancar
+            .withStartupTimeout(Duration.ofMinutes(2))
+            // Limitamos memoria para que el runner de GitHub no lo mate (OOM)
+            .withEnv("NEO4J_dbms_memory_pagecache_size", "512M")
+            .withEnv("NEO4J_dbms_memory_heap_max__size", "512M")
 
         @DynamicPropertySource
         @JvmStatic
-        fun neo4jProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.neo4j.uri", embeddedDatabaseServer::boltURI)
-            registry.add("spring.neo4j.authentication.username") { "neo4j" }
-            registry.add("spring.neo4j.authentication.password") { null }
+        fun propiedadesNeo4j(registroDePropiedades: DynamicPropertyRegistry) {
+            registroDePropiedades.add("spring.neo4j.uri") { contenedorNeo4j.boltUrl }
+            registroDePropiedades.add("spring.neo4j.authentication.username") { "neo4j" }
+            registroDePropiedades.add("spring.neo4j.authentication.password") { contenedorNeo4j.adminPassword }
         }
     }
 
     lateinit var nueveReinas: Pelicula
 
     @BeforeEach
-    fun init() {
-        val darin = Actor().apply {
+    fun inicializarDatos() {
+        val ricardoDarin = Actor().apply {
             nombreCompleto = "Ricardo Darín"
             anioNacimiento = 1957
         }
@@ -77,7 +77,7 @@ class PeliculaControllerTest {
             personajes = mutableListOf(
                 Personaje().apply {
                     roles = mutableListOf("Marcos")
-                    actor = darin
+                    actor = ricardoDarin
                 },
                 Personaje().apply {
                     roles = mutableListOf("Juan")
@@ -93,11 +93,10 @@ class PeliculaControllerTest {
             frase = "Los tiempos cambian. Los héroes también."
             anio = 2005
         })
-
     }
 
     @AfterEach
-    fun `delete fixture`() {
+    fun `eliminar datos de prueba`() {
         actoresRepository.deleteAll()
         peliculasRepository.deleteAll()
     }
@@ -141,7 +140,7 @@ class PeliculaControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.put("/pelicula/${nueveReinas.id!!}")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(nueveReinas))
+                .content(objectMapper.writeValueAsString(nueveReinas))
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -153,7 +152,6 @@ class PeliculaControllerTest {
 
     @Test
     fun `crear una pelicula funciona correctamente`() {
-        // creamos la película
         val plataDulce = Pelicula().apply {
             titulo = "Plata Dulce"
             anio = 1982
@@ -167,27 +165,25 @@ class PeliculaControllerTest {
                 anioNacimiento = 1929
             })
         }
-        val result = mockMvc.perform(
+        val resultadoDeLaPeticion = mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(plataDulce))
+                .content(objectMapper.writeValueAsString(plataDulce))
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.titulo").value("Plata Dulce"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.personajes.length()").value(2))
 
-        // borramos la película creada
-        val plataDulceCreada = mapper.readValue(result.andReturn().response.getContentAsString(), Pelicula::class.java)
+        val plataDulceCreada = objectMapper.readValue(resultadoDeLaPeticion.andReturn().response.getContentAsString(), Pelicula::class.java)
 
         mockMvc.perform(
             MockMvcRequestBuilders.delete("/pelicula/${plataDulceCreada.id}")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(plataDulce))
+                .content(objectMapper.writeValueAsString(plataDulce))
         )
             .andExpect(MockMvcResultMatchers.status().isOk)
 
-        // por último hacemos la búsqueda y no encontramos nada
         mockMvc.perform(
             MockMvcRequestBuilders.get("/peliculas/plata")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -195,7 +191,6 @@ class PeliculaControllerTest {
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(0))
-
     }
 
     @Test
@@ -228,7 +223,7 @@ class PeliculaControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.put("/pelicula/91724681624")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(nueveReinas))
+                .content(objectMapper.writeValueAsString(nueveReinas))
         )
             .andExpect(MockMvcResultMatchers.status().isNotFound)
     }
@@ -241,7 +236,7 @@ class PeliculaControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(peliculaConError))
+                .content(objectMapper.writeValueAsString(peliculaConError))
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -255,7 +250,7 @@ class PeliculaControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(peliculaConError))
+                .content(objectMapper.writeValueAsString(peliculaConError))
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -265,13 +260,14 @@ class PeliculaControllerTest {
         val peliculaConError = Pelicula().apply {
             titulo = "una peli"
             anio = 1990
-            personajes =
-                mutableListOf(Personaje().apply { actor = Actor().apply { nombreCompleto = "Ricardo Darín " } })
+            personajes = mutableListOf(Personaje().apply {
+                actor = Actor().apply { nombreCompleto = "Ricardo Darín " }
+            })
         }
         mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(peliculaConError))
+                .content(objectMapper.writeValueAsString(peliculaConError))
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -286,7 +282,7 @@ class PeliculaControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.post("/pelicula")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(peliculaConError))
+                .content(objectMapper.writeValueAsString(peliculaConError))
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -302,6 +298,4 @@ class PeliculaControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].nombreCompleto").value("Ricardo Darín"))
     }
-
-
 }
